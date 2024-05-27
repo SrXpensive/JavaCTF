@@ -5,13 +5,8 @@ public abstract class Participante {
     private int nIntentos;
     private Equipo equipo;
 
-    public Participante(String nombre, int puntosGanados, int[] flags, int nIntentos, Equipo equipo) {
+    public Participante(String nombre, Equipo equipo) {
         this.nombre = nombre;
-        this.puntosGanados = puntosGanados;
-        this.flags = flags;
-        this.nIntentos = nIntentos;
         this.equipo = equipo;
     }
-
-    ;
 }
