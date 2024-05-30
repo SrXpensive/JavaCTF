@@ -7,9 +7,10 @@ public abstract class Participante {
     private int nIntentos;
     private Equipo equipo;
 
-    public Participante(String nombre, Equipo equipo) {
+    public Participante(String nombre, Equipo equipo, int nIntentos) {
         this.nombre = nombre;
         this.equipo = equipo;
+        this.nIntentos = nIntentos;
     }
 
     public String getNombre() {
@@ -46,6 +47,10 @@ public abstract class Participante {
             System.out.println("Son el mismo participante");
         }
     }
-    public abstract void competirCon(Participante p);
+    public abstract void competirCon(Participante p, int r);
     protected abstract void retado(int idReto);
+
+    public void setnIntentos(int nIntentos) {
+        this.nIntentos = nIntentos;
+    }
 }
