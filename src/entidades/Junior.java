@@ -2,8 +2,9 @@ package entidades;
 public class Junior extends Participante {
     private int bonificacion;
     public Junior(String nombre, Equipo equipo, int bonificacion){
-        super(nombre,equipo,30);
+        super(nombre,equipo);
         this.bonificacion = bonificacion;
+        super.setnIntentos(30);
     }
 
     @Override
@@ -13,6 +14,6 @@ public class Junior extends Participante {
 
     @Override
     protected void retado(int idReto) {
-
+        System.out.println(getNombre()+" ha sido retado a resolver el reto nª "+idReto);
     }
 }

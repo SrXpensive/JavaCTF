@@ -7,10 +7,10 @@ public abstract class Participante {
     private int nIntentos;
     private Equipo equipo;
 
-    public Participante(String nombre, Equipo equipo, int nIntentos) {
+    public Participante(String nombre, Equipo equipo) {
         this.nombre = nombre;
         this.equipo = equipo;
-        this.nIntentos = nIntentos;
+        this.nIntentos = 20;
     }
 
     public String getNombre() {
@@ -42,15 +42,20 @@ public abstract class Participante {
     public String toString(){
         return getNombre()+" PG:"+getPuntosGanados()+"/ NF:"+totalFlags()+" / NI:"+getnIntentos();
     }
-    public void equals(Participante p){
-        if(this.nombre.equals(p.nombre)){
-            System.out.println("Son el mismo participante");
-        }
+    public boolean equals(Participante p1,Participante p2){
+        return p1 == p2;
     }
     public abstract void competirCon(Participante p, int r);
     protected abstract void retado(int idReto);
 
     public void setnIntentos(int nIntentos) {
         this.nIntentos = nIntentos;
+    }
+    public void asignarEquipo(Equipo e){
+        setEquipo(e);
+    }
+
+    public void setEquipo(Equipo equipo) {
+        this.equipo = equipo;
     }
 }
