@@ -1,6 +1,6 @@
 package entidades;
 
-public abstract class Participante {
+public abstract class Participante implements Comparable<Participante>{
     private String nombre;
     private int puntosGanados;
     private int[] flags = new int [3];
@@ -42,9 +42,13 @@ public abstract class Participante {
     public String toString(){
         return getNombre()+" PG:"+getPuntosGanados()+"/ NF:"+totalFlags()+" / NI:"+getnIntentos();
     }
-    public boolean equals(Participante p1,Participante p2){
-        return p1 == p2;
+    public boolean equals(Participante p){
+        return getNombre().equals(p.getNombre());
     }
+    public int compareTo(Participante p){
+        return getNombre().compareTo(p.getNombre());
+    }
+
     public abstract void competirCon(Participante p, int r);
     protected abstract void retado(int idReto);
 
@@ -52,7 +56,14 @@ public abstract class Participante {
         this.nIntentos = nIntentos;
     }
     public void asignarEquipo(Equipo e){
-        setEquipo(e);
+        if(!e.getParticipantes().contains(this)){
+            e.asignarMiembro(this);
+        }else{
+            setEquipo(e);
+        }
+    }
+    public void desasignarEquipo(Equipo a){
+        setEquipo(null);
     }
 
     public void setEquipo(Equipo equipo) {

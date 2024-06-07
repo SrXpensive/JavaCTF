@@ -1,4 +1,4 @@
-package leer;
+package io;
 
 import java.io.BufferedReader;
 import java.io.IOException;

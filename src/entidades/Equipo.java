@@ -2,7 +2,7 @@ package entidades;
 
 import java.util.ArrayList;
 
-public class Equipo {
+public class Equipo implements Comparable<Equipo>{
     private String nombre;
     private int puntos;
     private ArrayList<Participante> participantes= new ArrayList<>();
@@ -12,7 +12,7 @@ public class Equipo {
     }
     public void asignarMiembro(Participante p){
         participantes.add(p);
-        p.asignarEquipo(this);
+        p.setEquipo(this);
     }
     public void desasignarMiembro(Participante p){
         participantes.remove(p);
@@ -23,6 +23,9 @@ public class Equipo {
             cadena += p.toString()+"\n";
         }
         return cadena;
+    }
+    public boolean equals(Equipo e){
+        return getNombre().equals(e.getNombre());
     }
 
     public String getNombre() {
@@ -35,5 +38,10 @@ public class Equipo {
 
     public ArrayList<Participante> getParticipantes() {
         return participantes;
+    }
+
+    @Override
+    public int compareTo(Equipo e) {
+        return getPuntos() - e.getPuntos();
     }
 }

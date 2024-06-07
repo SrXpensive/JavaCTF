@@ -14,6 +14,6 @@ public class Junior extends Participante {
 
     @Override
     protected void retado(int idReto) {
-        System.out.println(getNombre()+" ha sido retado a resolver el reto nª "+idReto);
+        System.out.println(getNombre()+" ha sido retado a resolver el reto nº "+idReto);
     }
 }
