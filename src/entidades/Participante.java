@@ -10,7 +10,6 @@ public abstract class Participante implements Comparable<Participante>{
     public Participante(String nombre, Equipo equipo) {
         this.nombre = nombre;
         this.equipo = equipo;
-        this.nIntentos = 20;
     }
 
     public String getNombre() {
@@ -46,6 +45,9 @@ public abstract class Participante implements Comparable<Participante>{
         return getNombre().equals(p.getNombre());
     }
     public int compareTo(Participante p){
+        if(getNombre().equals(p.getNombre())){
+            return getEquipo().getNombre().compareTo(p.getEquipo().getNombre());
+        }
         return getNombre().compareTo(p.getNombre());
     }
 
