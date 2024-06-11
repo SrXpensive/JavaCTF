@@ -1,6 +1,8 @@
 package entidades;
 
-public abstract class Participante implements Comparable<Participante>{
+import java.io.Serializable;
+
+public abstract class Participante implements Comparable<Participante>, Serializable {
     private String nombre;
     private int puntosGanados;
     private int[] flags = new int [3];

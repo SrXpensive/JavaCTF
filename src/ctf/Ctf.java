@@ -1,8 +1,6 @@
 package ctf;
 
-import entidades.Equipo;
-import entidades.Junior;
-import entidades.Participante;
+import entidades.*;
 import exception.CTFException;
 import io.Leer;
 
@@ -60,6 +58,8 @@ public class Ctf {
                     int opcion3;
                     System.out.println("1. Listar participantes");
                     System.out.println("2. Introducir participantes");
+                    System.out.println("3. Dar de baja participante");
+                    System.out.println("4. Asignar participantes a un equipo");
                     opcion3 = Leer.leerEntero("Introduce una opción: ");
                     switch(opcion3){
                         case 1:
@@ -90,12 +90,83 @@ public class Ctf {
                             int rango = Leer.leerEntero("Introduce el rango del participante: ");
                             if(rango == 1){
                                 int bon = Leer.leerEntero("Introduce la bonificación del participante Junior: ");
-                                Participante p = new Junior(nombre,e,bon);
-                                participantes.add(p);
+                                Participante junior = new Junior(nombre,e,bon);
+                                participantes.add(junior);
                             }
-
+                            if(rango == 2){
+                                String especializacion = "";
+                                int pen;
+                                System.out.println("1. Web");
+                                System.out.println("2. Reversing");
+                                System.out.println("3. Stegano");
+                                System.out.println("4. Networking");
+                                System.out.println("5. Crypto");
+                                System.out.println("6. Osint");
+                                System.out.println("7. Scripting");
+                                int esp = Leer.leerEntero("Introduce la especialización del participante Especialista: ");
+                                switch(esp){
+                                    case 1:
+                                        especializacion = "Web";
+                                        break;
+                                    case 2:
+                                        especializacion = "Reversing";
+                                        break;
+                                    case 3:
+                                        especializacion = "Stegano";
+                                        break;
+                                    case 4:
+                                        especializacion = "Networking";
+                                        break;
+                                    case 5:
+                                        especializacion = "Crypto";
+                                        break;
+                                    case 6:
+                                        especializacion = "Osint";
+                                        break;
+                                    case 7:
+                                        especializacion = "Scripting";
+                                        break;
+                                }
+                                pen = Leer.leerEntero("Introduce la penalización del especialista si falla (número de puntos): ");
+                                Participante especialista = new Especialista(nombre,e,especializacion,pen);
+                                participantes.add(especialista);
+                            }
                             break;
-
+                        case 3:
+                            int contador=1;
+                            int opcion4;
+                            for(Participante p: participantes){
+                                System.out.println(contador+" "+p.getNombre());
+                                contador++;
+                            }
+                            opcion4 = Leer.leerEntero("¿Qué participante quieres dar de baja? (escribir su número): ");
+                            if(participantes.get(opcion4-1).getEquipo() != null){
+                                System.out.println("Procediendo a eliminar al participante de su equipo...");
+                                participantes.get(opcion4-1).getEquipo().desasignarMiembro(participantes.get(opcion4-1));
+                                System.out.println("Participante sin equipo");
+                            }else{
+                                participantes.remove(participantes.get(opcion4-1));
+                                System.out.println("Participante eliminado satisfactoriamente");
+                            }
+                            break;
+                        case 4:
+                            int contj = 1;
+                            int conteq = 1;
+                            int jugador;
+                            int eq;
+                            for(Participante p: participantes){
+                                System.out.println(contj+" "+p.getNombre());
+                                contj++;
+                            }
+                            jugador = Leer.leerEntero("¿A qué jugador quieres asignarle un equipo?(indica el número): ");
+                            for (Equipo equi:equipos){
+                                System.out.println(conteq+" "+equi.getNombre());
+                                conteq++;
+                            }
+                            eq = Leer.leerEntero("¿Qué equipo quieres asignarle? (indica el número): ");
+                            participantes.get(jugador-1).setEquipo(equipos.get(eq-1));
+                            System.out.println("Equipo asignado exitosamente");
+                            break;
                     }
             }
         }while(opcion2!=0);
