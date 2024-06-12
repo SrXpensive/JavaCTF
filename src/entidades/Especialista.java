@@ -17,4 +17,12 @@ public class Especialista extends Participante {
     protected void retado(int idReto) {
         System.out.println(getNombre()+" ha sido retado a resolver el reto nº "+idReto);
     }
+
+    public int getPenalizacion() {
+        return penalizacion;
+    }
+
+    public void setPenalizacion(int penalizacion) {
+        this.penalizacion = penalizacion;
+    }
 }

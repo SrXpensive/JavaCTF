@@ -4,6 +4,7 @@ import entidades.*;
 import exception.CTFException;
 import io.Leer;
 
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -168,8 +169,88 @@ public class Ctf {
                             System.out.println("Equipo asignado exitosamente");
                             break;
                     }
+                    break;
+                case 3:
+                    int opcion;
+                    System.out.println("1. Listar equipos");
+                    System.out.println("2. Dar de alta equipo");
+                    System.out.println("3. Dar de baja equipo");
+                    opcion = Leer.leerEntero("Introduce una opción: ");
+                    switch(opcion){
+                        case 1:
+                            if(equipos.isEmpty()){
+                                System.out.println("No hay equipos para mostrar");
+                            }else{
+                                for(Equipo e: equipos){
+                                    System.out.println(e);
+                                }
+                            }
+                            break;
+                        case 2:
+                            String nombre = Leer.leerTexto("Introduce el nombre del equipo: ");
+                            Equipo e = new Equipo(nombre);
+                            equipos.add(e);
+                            System.out.println("Equipo añadido exitosamente");
+                            break;
+                        case 3:
+                            if(equipos.isEmpty()){
+                                System.out.println("No hay equipos para borrar");
+                            }else{
+                                int cont = 1;
+                                int num;
+                                for(Equipo eq: equipos){
+                                    System.out.println(cont+" "+eq.getNombre());
+                                }
+                                num = Leer.leerEntero("¿Qué equipo quieres borrar? (introduce el número): ");
+                                equipos.remove(equipos.get(num-1));
+                                System.out.println("Equipo eliminado exitosamente");
+                            }
+                            break;
+                    }
+                case 4:
+                    try{
+                        FileInputStream fis = new FileInputStream("participantes.dat");
+                        ObjectInputStream ois = new ObjectInputStream(fis);
+                        while(fis.available() !=0){
+                            participantes = (ArrayList<Participante>) ois.readObject();
+                        }
+                        ois.close();
+                        fis.close();
+                        for(Participante p : participantes){
+                            if(p instanceof Especialista){
+                                p.setnIntentos(intentos);
+                            }
+                        }
+                    }catch(IOException | ClassNotFoundException e){
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case 5:
+                    try{
+                        FileOutputStream fos = new FileOutputStream("participantes.dat");
+                        ObjectOutputStream oos = new ObjectOutputStream(fos);
+                        for(Participante p : participantes){
+                            p.setnIntentos(0);
+                            p.setPuntosGanados(0);
+                            if(p instanceof Especialista){
+                                ((Especialista) p).setPenalizacion(0);
+                            }
+                            if(p instanceof Junior){
+                                ((Junior)p).setBonificacion(0);
+                            }
+                        }
+                        oos.writeObject(participantes);
+                        oos.close();
+                        fos.close();
+                    }catch(IOException e){
+                        System.out.println(e.getMessage());
+                    }
+                    break;
             }
         }while(opcion2!=0);
+    }
+    public static void competir(){
+
     }
     public static void conectar(){
         try{

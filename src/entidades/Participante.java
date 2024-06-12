@@ -73,4 +73,8 @@ public abstract class Participante implements Comparable<Participante>, Serializ
     public void setEquipo(Equipo equipo) {
         this.equipo = equipo;
     }
+
+    public void setPuntosGanados(int puntosGanados) {
+        this.puntosGanados = puntosGanados;
+    }
 }

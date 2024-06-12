@@ -16,4 +16,12 @@ public class Junior extends Participante {
     protected void retado(int idReto) {
         System.out.println(getNombre()+" ha sido retado a resolver el reto nº "+idReto);
     }
+
+    public int getBonificacion() {
+        return bonificacion;
+    }
+
+    public void setBonificacion(int bonificacion) {
+        this.bonificacion = bonificacion;
+    }
 }
