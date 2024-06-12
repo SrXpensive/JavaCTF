@@ -1,8 +1,9 @@
 package entidades;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Equipo implements Comparable<Equipo>{
+public class Equipo implements Comparable<Equipo>, Serializable {
     private String nombre;
     private int puntos;
     private ArrayList<Participante> participantes= new ArrayList<>();

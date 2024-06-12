@@ -12,10 +12,12 @@ import java.util.Collections;
 public class Ctf {
     static ArrayList<Participante> participantes = new ArrayList<>();
     static ArrayList<Equipo> equipos = new ArrayList<>();
+    static ArrayList<Equipo> ranking = new ArrayList<>();
     static int intentos = 40;
     static int puntosBajo = 5;
     static int puntosMedio = 15;
     static int puntosAlto = 30;
+    static int rondas = 3;
     public static void main(String[] args) {
         int opcion;
        do{
@@ -34,7 +36,7 @@ public class Ctf {
                    }
                    break;
                case 2:
-
+                    competir();
            }
        }while(opcion!=0);
     }
@@ -54,6 +56,7 @@ public class Ctf {
                     puntosBajo = Leer.leerEntero("Introduce los puntos obtenidos por resolver un reto de nivel bajo: ");
                     puntosMedio = Leer.leerEntero("Introduce los puntos obtenidos por resolver un reto de nivel medio: ");
                     puntosAlto = Leer.leerEntero("Introduce los puntos obtenidos por resolver un reto de nivel alto: ");
+                    rondas = Leer.leerEntero("Introduce el número de rondas máximo: ");
                     break;
                 case 2:
                     int opcion3;
@@ -221,7 +224,7 @@ public class Ctf {
                                 p.setnIntentos(intentos);
                             }
                         }
-                    }catch(IOException | ClassNotFoundException e){
+                    }catch(ClassNotFoundException | IOException e){
                         System.out.println(e.getMessage());
                     }
                     break;
@@ -250,6 +253,32 @@ public class Ctf {
         }while(opcion2!=0);
     }
     public static void competir(){
+        conectar();
+        int inicial = (int)(Math.random()*equipos.size());
+        File f = new File("ranking.dat");
+        if(f.exists()){
+            try{
+                FileInputStream fis = new FileInputStream(f);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                while(fis.available() !=0){
+                    ranking = (ArrayList<Equipo>) ois.readObject();
+                }
+                ois.close();
+                fis.close();
+            }catch(IOException | ClassNotFoundException e){
+                System.out.println(e.getMessage());
+            }
+            System.out.println("RANKING");
+            for(Equipo equipo: ranking){
+                System.out.println(equipo);
+            }
+            System.out.println("--------------");
+            System.out.println("COMIENZA EL JUEGO");
+
+            for(int i = 1; i<=rondas;i++){
+                System.out.println("Le toca al equipo "+equipos.get(inicial).getNombre());
+            }
+        }
 
     }
     public static void conectar(){
