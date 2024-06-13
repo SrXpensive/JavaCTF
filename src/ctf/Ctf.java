@@ -20,6 +20,11 @@ public class Ctf {
     static int puntosAlto = 30;
     static int rondas = 3;
     public static void main(String[] args) {
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        }catch(ClassNotFoundException e){
+            System.out.println(e.getMessage());
+        }
         int opcion;
        do{
            System.out.println("MENU");
@@ -280,73 +285,125 @@ public class Ctf {
             for(Equipo equipo: ranking){
                 System.out.println(equipo);
             }
-            System.out.println("--------------");
-            System.out.println("COMIENZA EL JUEGO");
+        }
+        System.out.println("--------------");
+        System.out.println("COMIENZA EL JUEGO");
 
-            for(int i = 1; i<=rondas; i++){
-                System.out.println("Ronda "+i);
-                for(int j = 0; j<equipos.size(); j++ ){
-                    indice = (inicial+j) % equipos.size();
-                    System.out.println("Le toca al equipo "+equipos.get(indice).getNombre());
-                    miembros = equipos.get(indice).getParticipantes();
-                    for(Participante p: miembros){
-                        System.out.println(cont+" "+p.getNombre());
-                        cont++;
+        for(int i = 1; i<=rondas; i++){
+            System.out.println("Ronda "+i);
+            for(int j = 0; j<equipos.size(); j++ ){
+                indice = (inicial+j) % equipos.size();
+                System.out.println("Le toca al equipo "+equipos.get(indice).getNombre());
+                miembros = equipos.get(indice).getParticipantes();
+                for(Participante p: miembros){
+                    System.out.println(cont+" "+p.getNombre());
+                    cont++;
+                }
+                int miembro = Leer.leerEntero("¿Quién va a retar? (introduce el número): ");
+                Participante atacante = equipos.get(indice).getParticipantes().get(miembro);
+                if(atacante.fueraDeLaCompeticion()){
+                    throw new CTFException("Este participante está fuera de la competición");
+                }else{
+                    int rival;
+                    for (int z = 0; z<equipos.size(); z++){
+                        if(equipos.get(z).getNombre().equals(equipos.get(indice).getNombre())){
+                            continue;
+                        }
+                        System.out.println(z+1+" "+equipos.get(z).getNombre());
                     }
-                    int miembro = Leer.leerEntero("¿Quién va a retar? (introduce el número): ");
-                    Participante atacante = equipos.get(indice).getParticipantes().get(miembro);
-                    if(atacante.fueraDeLaCompeticion()){
+                    rival = Leer.leerEntero("¿Contra qué equipo quieres enfrentarte? (introduce el número): ");
+                    miembros = equipos.get(rival).getParticipantes();
+                    for(Participante p: miembros){
+                        System.out.println(cont2+" "+p.getNombre());
+                    }
+                    int miembro2 = Leer.leerEntero("¿A qué miembro del equipo quieres desafiar? (introduce el número): ");
+                    Participante defensor = equipos.get(rival).getParticipantes().get(miembro2);
+                    if(defensor.fueraDeLaCompeticion()){
                         throw new CTFException("Este participante está fuera de la competición");
                     }else{
-                        int rival;
-                        for (int z = 0; z<equipos.size(); z++){
-                            if(equipos.get(z).getNombre().equals(equipos.get(indice).getNombre())){
-                                continue;
+                        mostrarRetos();
+                        int reto = Leer.leerEntero("¿Que reto quieres enviarle? (introduce su ID): ");
+                        atacante.competirCon(defensor,reto);
+                        String respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
+                        try(ResultSet res = reto(reto)){
+                            if(res != null){
+                                if(respuesta.equals(res.getString(5))){
+                                    puntosYFlags(atacante,res);
+                                }else{
+                                    if(atacante instanceof Especialista){
+                                        atacante.setPuntosGanados(atacante.getPuntosGanados()-((Especialista)atacante).getPenalizacion());
+                                    }
+                                    System.out.println("Has fallado. Rebote");
+                                    defensor.competirCon(atacante,reto);
+                                    respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
+                                    try(ResultSet rebote = reto(reto)){
+                                        if(rebote != null){
+                                            if(respuesta.equals(rebote.getString(5))){
+                                                puntosYFlags(defensor,rebote);
+                                            }else{
+                                                if(defensor instanceof Especialista){
+                                                    defensor.setPuntosGanados(defensor.getPuntosGanados()-((Especialista)defensor).getPenalizacion());
+                                                }
+                                                System.out.println("Has fallado tú también. Fin de la ronda "+i);
+                                            }
+                                        }
+                                    }catch(SQLException e){
+                                        System.out.println(e.getMessage());
+                                    }
+                                }
                             }
-                            System.out.println(z+1+" "+equipos.get(z).getNombre());
+                        }catch(SQLException e){
+                            System.out.println(e.getMessage());
                         }
-                        rival = Leer.leerEntero("¿Contra qué equipo quieres enfrentarte? (introduce el número): ");
-                        miembros = equipos.get(rival).getParticipantes();
-                        for(Participante p: miembros){
-                            System.out.println(cont2+" "+p.getNombre());
-                        }
-                        int miembro2 = Leer.leerEntero("¿A qué miembro del equipo quieres desafiar? (introduce el número): ");
-                        Participante defensor = equipos.get(rival).getParticipantes().get(miembro2);
-                        if(defensor.fueraDeLaCompeticion()){
-                            throw new CTFException("Este participante está fuera de la competición");
-                        }else{
-                            mostrarRetos();
-                            int reto = Leer.leerEntero("¿Qúe reto quieres enviarle? (introduce su ID): ");
-                            atacante.competirCon(defensor,reto);
-                        }
-
                     }
                 }
             }
         }
-
-    }
-    public static Connection conexion(){
-        try{
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CTF","root","root");
-            return conn;
-        }catch(Exception e){
-            System.out.println(e.getMessage());
-        }
-        return null;
     }
     public static void mostrarRetos(){
         ResultSet rs = null;
         try{
-            Statement s = conexion().createStatement();
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CTF","root","root");
+            Statement s = conn.createStatement();
             rs = s.executeQuery("select * from retos");
             while(rs.next()){
                 System.out.println(rs.getInt(1)+" "+rs.getString(2)+" "+rs.getString(3)+" "+rs.getString(4)+" "+rs.getString(5));
             }
+            rs.close();
+            s.close();
+            conn.close();
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
     }
-
+    public static ResultSet reto(int id){
+        try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CTF","root","root");
+            Statement s = conn.createStatement();
+            ResultSet rs = s.executeQuery("select * from retos where id ="+id)){
+                return rs;
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    public static void puntosYFlags(Participante p,ResultSet rs) throws SQLException {
+        switch(rs.getString(4)){
+            case "bajo":
+                p.setPuntosGanados(p.getPuntosGanados()+puntosBajo);
+                p.getFlags()[0] += 1;
+                break;
+            case "medio":
+                if(p instanceof Junior){
+                    p.setPuntosGanados(p.getPuntosGanados()+puntosMedio+((Junior)p).getBonificacion());
+                }
+                p.getFlags()[1] += 1;
+                break;
+            case "alto":
+                if(p instanceof Junior){
+                    p.setPuntosGanados(p.getPuntosGanados()+puntosAlto+((Junior)p).getBonificacion());
+                }
+                p.getFlags()[2] += 1;
+                break;
+        }
+    }
 }
