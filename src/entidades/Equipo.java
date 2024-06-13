@@ -21,7 +21,7 @@ public class Equipo implements Comparable<Equipo>, Serializable {
     public String toString(){
         String cadena= "";
         for(Participante p: participantes){
-            cadena += p.toString()+"\n";
+            cadena += "Nombre:"+p.toString()+" Equipo:"+this.getNombre()+"\n";
         }
         return cadena;
     }

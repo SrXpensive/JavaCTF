@@ -14,7 +14,8 @@ public class Ctf {
     static ArrayList<Equipo> equipos = new ArrayList<>();
     static ArrayList<Equipo> ranking = new ArrayList<>();
     static ArrayList<Participante> miembros = new ArrayList<>();
-    static int intentos = 40;
+    static ArrayList<Equipo> rivales = new ArrayList<>();
+    static int intentos = 20;
     static int puntosBajo = 5;
     static int puntosMedio = 15;
     static int puntosAlto = 30;
@@ -78,28 +79,37 @@ public class Ctf {
                     opcion3 = Leer.leerEntero("Introduce una opción: ");
                     switch(opcion3){
                         case 1:
-                            Collections.sort(participantes);
-                            for(Participante p: participantes){
-                                System.out.println("Nombre: "+p.getNombre()+", Equipo: "+p.getEquipo());
+                            if(participantes.isEmpty()){
+                                System.out.println("No hay participantes para mostrar");
+                            }else{
+                                Collections.sort(participantes);
+                                for(Participante p: participantes){
+                                    System.out.println("Nombre: "+p.getNombre()+", Equipo: "+p.getEquipo().getNombre());
+                                }
                             }
-                        break;
+                            break;
                         case 2:
                             Equipo e = null;
+                            int cont=1;
+                            if(equipos.isEmpty()){
+                                System.out.println("Cada jugador debe ir en un equipo y todavía no hay ningún equipo, añade primero alguno");
+                                break;
+                            }
                             String nombre = Leer.leerTexto("Introduce el nombre del participante: ");
                             for(Participante p: participantes){
                                 if(p.getNombre().equals(nombre)){
                                     throw new CTFException("El participante ya existe");
                                 }
                             }
-                            String equipo = Leer.leerTexto("Introduce el nombre del equipo del participante: ");
-                            for(Equipo eq:equipos){
-                                if(eq.getNombre().equals(equipo)){
-                                    e = eq;
-                                    break;
-                                }else{
-                                    throw new CTFException("El equipo no existe");
-                                }
+                            for(Equipo eq : equipos){
+                                System.out.println(cont+" "+eq.getNombre());
+                                cont++;
                             }
+                            int indice = Leer.leerEntero("Introduce el equipo (número): ");
+                            if(indice-1 > equipos.size()){
+                                throw new CTFException("El equipo no existe");
+                            }
+                            e = equipos.get(indice-1);
                             System.out.println("1. Junior");
                             System.out.println("2. Especialista");
                             int rango = Leer.leerEntero("Introduce el rango del participante: ");
@@ -107,6 +117,7 @@ public class Ctf {
                                 int bon = Leer.leerEntero("Introduce la bonificación del participante Junior: ");
                                 Participante junior = new Junior(nombre,e,bon);
                                 participantes.add(junior);
+                                e.asignarMiembro(junior);
                             }
                             if(rango == 2){
                                 String especializacion = "";
@@ -145,6 +156,8 @@ public class Ctf {
                                 pen = Leer.leerEntero("Introduce la penalización del especialista si falla (número de puntos): ");
                                 Participante especialista = new Especialista(nombre,e,especializacion,pen);
                                 participantes.add(especialista);
+                                especialista.setnIntentos(intentos);
+                                e.asignarMiembro(especialista);
                             }
                             break;
                         case 3:
@@ -195,6 +208,7 @@ public class Ctf {
                             if(equipos.isEmpty()){
                                 System.out.println("No hay equipos para mostrar");
                             }else{
+                                Collections.sort(equipos);
                                 for(Equipo e: equipos){
                                     System.out.println(e);
                                 }
@@ -221,9 +235,12 @@ public class Ctf {
                             }
                             break;
                     }
+                    break;
                 case 4:
                     try{
-                        FileInputStream fis = new FileInputStream("participantes.dat");
+                        File f = new File("participantes.dat");
+                        if(!f.exists()){f.createNewFile();}
+                        FileInputStream fis = new FileInputStream(f);
                         ObjectInputStream ois = new ObjectInputStream(fis);
                         while(fis.available() !=0){
                             participantes = (ArrayList<Participante>) ois.readObject();
@@ -264,8 +281,6 @@ public class Ctf {
         }while(opcion2!=0);
     }
     public static void competir() throws CTFException{
-        int cont=1;
-        int cont2=1;
         int inicial = (int)(Math.random()*equipos.size());
         int indice;
         File f = new File("ranking.dat");
@@ -288,99 +303,111 @@ public class Ctf {
         }
         System.out.println("--------------");
         System.out.println("COMIENZA EL JUEGO");
-
-        for(int i = 1; i<=rondas; i++){
-            System.out.println("Ronda "+i);
-            for(int j = 0; j<equipos.size(); j++ ){
-                indice = (inicial+j) % equipos.size();
-                System.out.println("Le toca al equipo "+equipos.get(indice).getNombre());
-                miembros = equipos.get(indice).getParticipantes();
-                for(Participante p: miembros){
-                    System.out.println(cont+" "+p.getNombre());
-                    cont++;
-                }
-                int miembro = Leer.leerEntero("¿Quién va a retar? (introduce el número): ");
-                Participante atacante = equipos.get(indice).getParticipantes().get(miembro);
-                if(atacante.fueraDeLaCompeticion()){
-                    throw new CTFException("Este participante está fuera de la competición");
-                }else{
-                    int rival;
-                    for (int z = 0; z<equipos.size(); z++){
-                        if(equipos.get(z).getNombre().equals(equipos.get(indice).getNombre())){
-                            continue;
-                        }
-                        System.out.println(z+1+" "+equipos.get(z).getNombre());
-                    }
-                    rival = Leer.leerEntero("¿Contra qué equipo quieres enfrentarte? (introduce el número): ");
-                    miembros = equipos.get(rival).getParticipantes();
+        if(participantes.isEmpty()){
+            System.out.println("No hay participantes, añade algunos antes de comenzar");
+        }else{
+            for(int i = 1; i<=rondas; i++){
+                System.out.println("Ronda "+i);
+                for(int j = 0; j<equipos.size(); j++ ){
+                    indice = (inicial+j) % equipos.size();
+                    System.out.println("Le toca al equipo "+equipos.get(indice).getNombre());
+                    miembros = equipos.get(indice).getParticipantes();
+                    int cont=1;
                     for(Participante p: miembros){
-                        System.out.println(cont2+" "+p.getNombre());
+                        System.out.println(cont+" "+p.getNombre());
+                        cont++;
                     }
-                    int miembro2 = Leer.leerEntero("¿A qué miembro del equipo quieres desafiar? (introduce el número): ");
-                    Participante defensor = equipos.get(rival).getParticipantes().get(miembro2);
-                    if(defensor.fueraDeLaCompeticion()){
+                    int miembro = Leer.leerEntero("¿Quién va a retar? (introduce el número): ");
+                    Participante atacante = equipos.get(indice).getParticipantes().get(miembro-1);
+                    if(atacante.fueraDeLaCompeticion()){
                         throw new CTFException("Este participante está fuera de la competición");
                     }else{
-                        mostrarRetos();
-                        int reto = Leer.leerEntero("¿Que reto quieres enviarle? (introduce su ID): ");
-                        atacante.competirCon(defensor,reto);
-                        String respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
-                        try(ResultSet res = reto(reto)){
-                            if(res != null){
-                                if(respuesta.equals(res.getString(5))){
-                                    puntosYFlags(atacante,res);
-                                }else{
-                                    if(atacante instanceof Especialista){
-                                        atacante.setPuntosGanados(atacante.getPuntosGanados()-((Especialista)atacante).getPenalizacion());
-                                    }
-                                    System.out.println("Has fallado. Rebote");
-                                    defensor.competirCon(atacante,reto);
-                                    respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
-                                    try(ResultSet rebote = reto(reto)){
-                                        if(rebote != null){
-                                            if(respuesta.equals(rebote.getString(5))){
-                                                puntosYFlags(defensor,rebote);
-                                            }else{
-                                                if(defensor instanceof Especialista){
-                                                    defensor.setPuntosGanados(defensor.getPuntosGanados()-((Especialista)defensor).getPenalizacion());
-                                                }
-                                                System.out.println("Has fallado tú también. Fin de la ronda "+i);
-                                            }
+                        int rival;
+                        int cont3 = 1;
+                        for(Equipo e: equipos){
+                            if(e.getNombre().equals(equipos.get(indice).getNombre())){
+                                continue;
+                            }
+                            System.out.println(cont3+" "+e.getNombre());
+                            rivales.add(e);
+                            cont3++;
+                         }
+                        rival = Leer.leerEntero("¿Contra qué equipo quieres enfrentarte? (introduce el número): ");
+                        miembros = rivales.get(rival-1).getParticipantes();
+                        int cont2 = 1;
+                        for(Participante p: miembros){
+                            System.out.println(cont2+" "+p.getNombre());
+                            cont2++;
+                        }
+                        int miembro2 = Leer.leerEntero("¿A qué miembro del equipo quieres desafiar? (introduce el número): ");
+                        Participante defensor = equipos.get(rival).getParticipantes().get(miembro2-1);
+                        if(defensor.fueraDeLaCompeticion()){
+                            throw new CTFException("Este participante está fuera de la competición");
+                        }else{
+                            mostrarRetos();
+                            int reto = Leer.leerEntero("¿Que reto quieres enviarle? (introduce su ID): ");
+                            atacante.competirCon(defensor,reto);
+                            String respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
+                            try(ResultSet res = reto(reto)){
+                                if(res != null){
+                                    if(respuesta.equals(res.getString(5))){
+                                        System.out.println("Has acertado!");
+                                        puntosYFlags(atacante,res);
+
+                                    }else{
+                                        if(atacante instanceof Especialista){
+                                            atacante.setPuntosGanados(atacante.getPuntosGanados()-((Especialista)atacante).getPenalizacion());
                                         }
-                                    }catch(SQLException e){
-                                        System.out.println(e.getMessage());
+                                        System.out.println("Has fallado. Rebote");
+                                        defensor.competirCon(atacante,reto);
+                                        respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
+                                        try(ResultSet rebote = reto(reto)){
+                                            if(rebote != null){
+                                                if(respuesta.equals(rebote.getString(5))){
+                                                    puntosYFlags(defensor,rebote);
+                                                }else{
+                                                    if(defensor instanceof Especialista){
+                                                        defensor.setPuntosGanados(defensor.getPuntosGanados()-((Especialista)defensor).getPenalizacion());
+                                                    }
+                                                    System.out.println("Has fallado tú también. Fin de la ronda "+i);
+                                                }
+                                            }
+                                        }catch(SQLException e){
+                                            System.out.println(e.getMessage());
+                                        }
                                     }
                                 }
+                            }catch(SQLException e){
+                                System.out.println(e.getMessage());
                             }
-                        }catch(SQLException e){
-                            System.out.println(e.getMessage());
                         }
                     }
                 }
             }
         }
+
     }
     public static void mostrarRetos(){
         ResultSet rs = null;
         try{
-            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CTF","root","root");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.122:3306/CTF","edu","alumne");
             Statement s = conn.createStatement();
             rs = s.executeQuery("select * from retos");
             while(rs.next()){
-                System.out.println(rs.getInt(1)+" "+rs.getString(2)+" "+rs.getString(3)+" "+rs.getString(4)+" "+rs.getString(5));
+                System.out.println(rs.getInt(1)+" "+rs.getString(2)+" "+rs.getString(3)+" "+rs.getString(4));
             }
-            rs.close();
-            s.close();
-            conn.close();
+
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
     }
     public static ResultSet reto(int id){
-        try(Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CTF","root","root");
+        try{
+            Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.122:3306/CTF","edu","alumne");
             Statement s = conn.createStatement();
-            ResultSet rs = s.executeQuery("select * from retos where id ="+id)){
-                return rs;
+            ResultSet rs = s.executeQuery("select * from retos where id ="+id);
+            rs.next();
+            return rs;
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
