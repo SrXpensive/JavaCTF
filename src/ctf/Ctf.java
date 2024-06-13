@@ -13,6 +13,7 @@ public class Ctf {
     static ArrayList<Participante> participantes = new ArrayList<>();
     static ArrayList<Equipo> equipos = new ArrayList<>();
     static ArrayList<Equipo> ranking = new ArrayList<>();
+    static ArrayList<Participante> miembros = new ArrayList<>();
     static int intentos = 40;
     static int puntosBajo = 5;
     static int puntosMedio = 15;
@@ -36,7 +37,12 @@ public class Ctf {
                    }
                    break;
                case 2:
-                    competir();
+                   try{
+                       competir();
+                   }catch(CTFException e){
+                       System.out.println(e.getMessage());
+                   }
+
            }
        }while(opcion!=0);
     }
@@ -146,7 +152,7 @@ public class Ctf {
                             opcion4 = Leer.leerEntero("¿Qué participante quieres dar de baja? (escribir su número): ");
                             if(participantes.get(opcion4-1).getEquipo() != null){
                                 System.out.println("Procediendo a eliminar al participante de su equipo...");
-                                participantes.get(opcion4-1).getEquipo().desasignarMiembro(participantes.get(opcion4-1));
+                                participantes.get(opcion4-1).desasignarEquipo(participantes.get(opcion4-1).getEquipo());
                                 System.out.println("Participante sin equipo");
                             }else{
                                 participantes.remove(participantes.get(opcion4-1));
@@ -168,7 +174,7 @@ public class Ctf {
                                 conteq++;
                             }
                             eq = Leer.leerEntero("¿Qué equipo quieres asignarle? (indica el número): ");
-                            participantes.get(jugador-1).setEquipo(equipos.get(eq-1));
+                            participantes.get(jugador-1).asignarEquipo(equipos.get(eq-1));
                             System.out.println("Equipo asignado exitosamente");
                             break;
                     }
@@ -252,9 +258,11 @@ public class Ctf {
             }
         }while(opcion2!=0);
     }
-    public static void competir(){
-        conectar();
+    public static void competir() throws CTFException{
+        int cont=1;
+        int cont2=1;
         int inicial = (int)(Math.random()*equipos.size());
+        int indice;
         File f = new File("ranking.dat");
         if(f.exists()){
             try{
@@ -275,17 +283,68 @@ public class Ctf {
             System.out.println("--------------");
             System.out.println("COMIENZA EL JUEGO");
 
-            for(int i = 1; i<=rondas;i++){
-                System.out.println("Le toca al equipo "+equipos.get(inicial).getNombre());
+            for(int i = 1; i<=rondas; i++){
+                System.out.println("Ronda "+i);
+                for(int j = 0; j<equipos.size(); j++ ){
+                    indice = (inicial+j) % equipos.size();
+                    System.out.println("Le toca al equipo "+equipos.get(indice).getNombre());
+                    miembros = equipos.get(indice).getParticipantes();
+                    for(Participante p: miembros){
+                        System.out.println(cont+" "+p.getNombre());
+                        cont++;
+                    }
+                    int miembro = Leer.leerEntero("¿Quién va a retar? (introduce el número): ");
+                    Participante atacante = equipos.get(indice).getParticipantes().get(miembro);
+                    if(atacante.fueraDeLaCompeticion()){
+                        throw new CTFException("Este participante está fuera de la competición");
+                    }else{
+                        int rival;
+                        for (int z = 0; z<equipos.size(); z++){
+                            if(equipos.get(z).getNombre().equals(equipos.get(indice).getNombre())){
+                                continue;
+                            }
+                            System.out.println(z+1+" "+equipos.get(z).getNombre());
+                        }
+                        rival = Leer.leerEntero("¿Contra qué equipo quieres enfrentarte? (introduce el número): ");
+                        miembros = equipos.get(rival).getParticipantes();
+                        for(Participante p: miembros){
+                            System.out.println(cont2+" "+p.getNombre());
+                        }
+                        int miembro2 = Leer.leerEntero("¿A qué miembro del equipo quieres desafiar? (introduce el número): ");
+                        Participante defensor = equipos.get(rival).getParticipantes().get(miembro2);
+                        if(defensor.fueraDeLaCompeticion()){
+                            throw new CTFException("Este participante está fuera de la competición");
+                        }else{
+                            mostrarRetos();
+                            int reto = Leer.leerEntero("¿Qúe reto quieres enviarle? (introduce su ID): ");
+                            atacante.competirCon(defensor,reto);
+                        }
+
+                    }
+                }
             }
         }
 
     }
-    public static void conectar(){
+    public static Connection conexion(){
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/CTF","root","root");
+            return conn;
         }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+    public static void mostrarRetos(){
+        ResultSet rs = null;
+        try{
+            Statement s = conexion().createStatement();
+            rs = s.executeQuery("select * from retos");
+            while(rs.next()){
+                System.out.println(rs.getInt(1)+" "+rs.getString(2)+" "+rs.getString(3)+" "+rs.getString(4)+" "+rs.getString(5));
+            }
+        }catch(SQLException e){
             System.out.println(e.getMessage());
         }
     }

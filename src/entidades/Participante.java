@@ -77,4 +77,7 @@ public abstract class Participante implements Comparable<Participante>, Serializ
     public void setPuntosGanados(int puntosGanados) {
         this.puntosGanados = puntosGanados;
     }
+    public boolean fueraDeLaCompeticion(){
+        return getnIntentos() < 0;
+    }
 }
