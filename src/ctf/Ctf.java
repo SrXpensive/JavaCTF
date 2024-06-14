@@ -14,7 +14,7 @@ public class Ctf {
     static ArrayList<Equipo> equipos = new ArrayList<>();
     static ArrayList<Equipo> ranking = new ArrayList<>();
     static ArrayList<Participante> miembros = new ArrayList<>();
-    static ArrayList<Equipo> rivales = new ArrayList<>();
+
     static int intentos = 20;
     static int puntosBajo = 5;
     static int puntosMedio = 15;
@@ -76,6 +76,7 @@ public class Ctf {
                     System.out.println("2. Introducir participantes");
                     System.out.println("3. Dar de baja participante");
                     System.out.println("4. Asignar participantes a un equipo");
+                    System.out.println("0. Atrás");
                     opcion3 = Leer.leerEntero("Introduce una opción: ");
                     switch(opcion3){
                         case 1:
@@ -324,6 +325,7 @@ public class Ctf {
                     }else{
                         int rival;
                         int cont3 = 1;
+                        ArrayList<Equipo> rivales = new ArrayList<>();
                         for(Equipo e: equipos){
                             if(e.getNombre().equals(equipos.get(indice).getNombre())){
                                 continue;
@@ -331,7 +333,7 @@ public class Ctf {
                             System.out.println(cont3+" "+e.getNombre());
                             rivales.add(e);
                             cont3++;
-                         }
+                        }
                         rival = Leer.leerEntero("¿Contra qué equipo quieres enfrentarte? (introduce el número): ");
                         miembros = rivales.get(rival-1).getParticipantes();
                         int cont2 = 1;
@@ -340,7 +342,7 @@ public class Ctf {
                             cont2++;
                         }
                         int miembro2 = Leer.leerEntero("¿A qué miembro del equipo quieres desafiar? (introduce el número): ");
-                        Participante defensor = equipos.get(rival).getParticipantes().get(miembro2-1);
+                        Participante defensor = rivales.get(rival-1).getParticipantes().get(miembro2-1);
                         if(defensor.fueraDeLaCompeticion()){
                             throw new CTFException("Este participante está fuera de la competición");
                         }else{
@@ -352,28 +354,38 @@ public class Ctf {
                                 if(res != null){
                                     if(respuesta.equals(res.getString(5))){
                                         System.out.println("Has acertado!");
-                                        puntosYFlags(atacante,res);
-
-                                    }else{
-                                        if(atacante instanceof Especialista){
-                                            atacante.setPuntosGanados(atacante.getPuntosGanados()-((Especialista)atacante).getPenalizacion());
-                                        }
-                                        System.out.println("Has fallado. Rebote");
+                                        puntosYFlags(defensor,res);
+                                        defensor.setnIntentos(defensor.getnIntentos()-1);
+                                        atacante.setPuntosGanados(atacante.getPuntosGanados()-5);
+                                        System.out.println("Ahora "+defensor.getNombre()+" retará a "+atacante.getNombre());
+                                        mostrarRetos();
+                                        reto = Leer.leerEntero("¿Qué reto quieres enviarle? (introduce su ID): ");
                                         defensor.competirCon(atacante,reto);
                                         respuesta = Leer.leerTexto("¿Cuál es la solución a este reto?: ");
                                         try(ResultSet rebote = reto(reto)){
                                             if(rebote != null){
                                                 if(respuesta.equals(rebote.getString(5))){
-                                                    puntosYFlags(defensor,rebote);
+                                                    System.out.println("Has acertado!");
+                                                    puntosYFlags(atacante,rebote);
+                                                    atacante.setnIntentos(atacante.getnIntentos()-1);
+                                                    atacante.setPuntosGanados(atacante.getPuntosGanados()+20);
+                                                    defensor.setPuntosGanados(defensor.getPuntosGanados()-5);
                                                 }else{
-                                                    if(defensor instanceof Especialista){
-                                                        defensor.setPuntosGanados(defensor.getPuntosGanados()-((Especialista)defensor).getPenalizacion());
+                                                    System.out.println("Has fallado");
+                                                    atacante.setnIntentos(atacante.getnIntentos()-3);
+                                                    if(atacante instanceof Especialista){
+                                                        atacante.setPuntosGanados(atacante.getPuntosGanados()-((Especialista)atacante).getPenalizacion());
                                                     }
-                                                    System.out.println("Has fallado tú también. Fin de la ronda "+i);
                                                 }
                                             }
                                         }catch(SQLException e){
                                             System.out.println(e.getMessage());
+                                        }
+                                    }else{
+                                        System.out.println("Has fallado");
+                                        defensor.setnIntentos(defensor.getnIntentos()-3);
+                                        if(defensor instanceof Especialista){
+                                            defensor.setPuntosGanados(defensor.getPuntosGanados()-((Especialista)defensor).getPenalizacion());
                                         }
                                     }
                                 }
@@ -384,13 +396,19 @@ public class Ctf {
                     }
                 }
             }
+            System.out.println("FINAL DE LA PARTIDA");
+            System.out.println("-------------------");
+            System.out.println("RESULTADOS");
+            for(Participante p: participantes){
+                System.out.println(p);
+            }
         }
 
     }
     public static void mostrarRetos(){
         ResultSet rs = null;
         try{
-            Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.122:3306/CTF","edu","alumne");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.108:3306/CTF","edu","alumne");
             Statement s = conn.createStatement();
             rs = s.executeQuery("select * from retos");
             while(rs.next()){
@@ -403,7 +421,7 @@ public class Ctf {
     }
     public static ResultSet reto(int id){
         try{
-            Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.122:3306/CTF","edu","alumne");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.108:3306/CTF","edu","alumne");
             Statement s = conn.createStatement();
             ResultSet rs = s.executeQuery("select * from retos where id ="+id);
             rs.next();

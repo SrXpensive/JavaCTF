@@ -15,7 +15,7 @@ public class Especialista extends Participante {
 
     @Override
     protected void retado(int idReto) {
-        System.out.println(getNombre()+" ha sido retado a resolver el reto nº "+idReto);
+        System.out.println(this.getNombre()+" ha sido retado a resolver el reto nº "+idReto);
     }
 
     public int getPenalizacion() {
