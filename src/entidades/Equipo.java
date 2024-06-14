@@ -1,3 +1,6 @@
+/**
+ * @author Eduardo Caro Lorente
+ */
 package entidades;
 
 import java.io.Serializable;
@@ -21,7 +24,7 @@ public class Equipo implements Comparable<Equipo>, Serializable {
     public String toString(){
         String cadena= "";
         for(Participante p: participantes){
-            cadena += "Nombre:"+p.toString()+" Equipo:"+this.getNombre()+"\n";
+            cadena += "Nombre:"+p.toString()+" Equipo:"+this.getNombre()+" Puntos:"+getPuntos()+"\n";
         }
         return cadena;
     }
@@ -44,5 +47,9 @@ public class Equipo implements Comparable<Equipo>, Serializable {
     @Override
     public int compareTo(Equipo e) {
         return getPuntos() - e.getPuntos();
+    }
+
+    public void setPuntos(int puntos) {
+        this.puntos = puntos;
     }
 }

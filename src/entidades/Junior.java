@@ -1,3 +1,6 @@
+/**
+ * @author Eduardo Caro Lorente
+ */
 package entidades;
 public class Junior extends Participante {
     private int bonificacion;

@@ -1,3 +1,6 @@
+/**
+ * @author Eduardo Caro Lorente
+ */
 package ctf;
 
 import entidades.*;
@@ -399,9 +402,19 @@ public class Ctf {
             System.out.println("FINAL DE LA PARTIDA");
             System.out.println("-------------------");
             System.out.println("RESULTADOS");
+            System.out.println("POR PARTICIPANTES");
+            System.out.println("-----------");
             for(Participante p: participantes){
+                p.getEquipo().setPuntos(p.getEquipo().getPuntos()+p.getPuntosGanados());
                 System.out.println(p);
             }
+            System.out.println("--------------");
+            System.out.println("POR EQUIPOS");
+            Collections.sort(equipos);
+            for(Equipo eq: equipos){
+                System.out.println(eq);
+            }
+            System.out.println("El equipo ganador es "+equipos.getFirst().getNombre());
         }
 
     }

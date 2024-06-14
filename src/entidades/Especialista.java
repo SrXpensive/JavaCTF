@@ -1,3 +1,6 @@
+/**
+ * @author Eduardo Caro Lorente
+ */
 package entidades;
 public class Especialista extends Participante {
     private String especialidad;

@@ -1,6 +1,10 @@
+/**
+ * @author Eduardo Caro Lorente
+ */
 package entidades;
 
 import java.io.Serializable;
+
 
 public abstract class Participante implements Comparable<Participante>, Serializable {
     private String nombre;
