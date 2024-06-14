@@ -12,6 +12,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 
+/**
+ * Ejecución principal del programa
+ */
 public class Ctf {
     static ArrayList<Participante> participantes = new ArrayList<>();
     static ArrayList<Equipo> equipos = new ArrayList<>();
@@ -55,6 +58,11 @@ public class Ctf {
            }
        }while(opcion!=0);
     }
+
+    /**
+     * Método que engloba las opciones de configuración
+     * @throws CTFException excepción para controlar si el participante ya existe o el equipo al que se desea asignar un participante no existe
+     */
     public static void configurar() throws CTFException {
         int opcion2;
         do{
@@ -284,6 +292,11 @@ public class Ctf {
             }
         }while(opcion2!=0);
     }
+
+    /**
+     * Método que engloba el bucle de la competición
+     * @throws CTFException excepción para controlar si un participante está fuera de la competición
+     */
     public static void competir() throws CTFException{
         int inicial = (int)(Math.random()*equipos.size());
         int indice;
@@ -412,12 +425,18 @@ public class Ctf {
             System.out.println("POR EQUIPOS");
             Collections.sort(equipos);
             for(Equipo eq: equipos){
-                System.out.println(eq);
+                if(eq.getPuntos()<0){
+                    eq.setPuntos(0);
+                }
+                System.out.println(eq.getNombre()+" "+eq.getPuntos());
             }
             System.out.println("El equipo ganador es "+equipos.getFirst().getNombre());
         }
-
     }
+
+    /**
+     * Este método se conecta a la base de datos y muestra la tabla de retos
+     */
     public static void mostrarRetos(){
         ResultSet rs = null;
         try{
@@ -432,6 +451,12 @@ public class Ctf {
             System.out.println(e.getMessage());
         }
     }
+
+    /**
+     * Este método devuelve el ResultSet del registro del reto seleccionado, para comprobar si la solución es correcta
+     * @param id es el identificador del reto
+     * @return el ResultSet del reto indicado por parametro
+     */
     public static ResultSet reto(int id){
         try{
             Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.1.108:3306/CTF","edu","alumne");
@@ -444,6 +469,13 @@ public class Ctf {
         }
         return null;
     }
+
+    /**
+     * Este método sirve para asignar de forma general los puntos y las flags conseguidas
+     * @param p Es el participante a quien sumarle puntos y flags
+     * @param rs es el ResultSet para comparar la complejidad (bajo, medio, alto) del reto
+     * @throws SQLException para controlar excepciones relacionadas con el SQL del ResultSet
+     */
     public static void puntosYFlags(Participante p,ResultSet rs) throws SQLException {
         switch(rs.getString(4)){
             case "bajo":
